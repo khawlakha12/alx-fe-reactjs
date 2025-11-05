@@ -9,6 +9,7 @@ function Footer() {
         textAlign: 'center',
         padding: '10px',
         marginTop: '20px',
+        borderTop: '2px solid #555',
       }}
     >
       <p>&copy; 2025 My Favorite Cities App</p>
