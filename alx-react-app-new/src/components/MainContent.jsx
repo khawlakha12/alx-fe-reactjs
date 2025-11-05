@@ -16,6 +16,7 @@ function MainContent() {
       <p style={{ color: '#555', maxWidth: '600px', margin: '0 auto' }}>
         Explore profiles of users and their favorite destinations around the world!
       </p>
+      <p>I love to visit New York, Paris, and Tokyo.</p>
     </main>
   );
 }
