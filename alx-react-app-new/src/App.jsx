@@ -8,12 +8,19 @@ import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import UserProfile from './components/UserProfile';
 import Counter from './components/Counter';
+import UserContext from './UserContext';
+import ProfilePage from './ProfilePage';
 
 
 function App() {
   const [count, setCount] = useState(0)
+  const userData = { name: "Jane Doe", email: "jane.doe@example.com" };
     return (
+      
         <div>
+    <UserContext.Provider value={userData}>
+      <ProfilePage />
+    </UserContext.Provider>
            <UserProfile 
         name="Alice" 
         age={25} 
