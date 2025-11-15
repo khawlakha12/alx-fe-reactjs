@@ -1,54 +1,40 @@
-import React from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useRecipeStore } from '../store/recipeStore'
-import DeleteRecipeButton from './DeleteRecipeButton'
-
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useRecipeStore } from "../store/recipeStore";
+import DeleteRecipeButton from "./DeleteRecipeButton";
 
 const RecipeDetails = () => {
-const { id } = useParams()
-const recipe = useRecipeStore((s) => s.recipes.find((r) => r.id === id))
-const navigate = useNavigate()
+  const { id } = useParams();
+  const navigate = useNavigate();
 
+  const recipe = useRecipeStore(state =>
+    state.recipes.find(r => r.id === id)
+  );
 
-if (!recipe) {
-return (
-<div>
-<p>Recipe not found.</p>
-<button onClick={() => navigate(-1)}>Go back</button>
-</div>
-)
-}
+  if (!recipe) return <p>Recipe not found</p>;
 
+  return (
+    <div>
+      <h1>{recipe.title}</h1>
+      <p>{recipe.description}</p>
 
-return (
-<div>
-<h1>{recipe.title}</h1>
-<p>{recipe.description}</p>
+      <h3>Ingredients</h3>
+      <ul>
+        {recipe.ingredients?.map((i, index) => (
+          <li key={index}>{i}</li>
+        ))}
+      </ul>
 
+      <h3>Steps</h3>
+      <ol>
+        {recipe.steps?.map((s, index) => (
+          <li key={index}>{s}</li>
+        ))}
+      </ol>
 
-<h4>Ingredients</h4>
-<ul>
-{recipe.ingredients?.map((ing, idx) => (
-<li key={idx}>{ing}</li>
-))}
-</ul>
+      <Link to={`/edit/${id}`}>Edit</Link>
+      <DeleteRecipeButton recipeId={id} onDeleted={() => navigate("/")} />
+    </div>
+  );
+};
 
-
-<h4>Steps</h4>
-<ol>
-{recipe.steps?.map((step, idx) => (
-<li key={idx}>{step}</li>
-))}
-</ol>
-
-
-<div style={{ marginTop: 12 }}>
-<Link to={`/edit/${recipe.id}`} style={{ marginRight: 8 }}>Edit</Link>
-<DeleteRecipeButton recipeId={recipe.id} onDeleted={() => navigate('/')} />
-</div>
-</div>
-)
-}
-
-
-export default RecipeDetails
+export default RecipeDetails;
