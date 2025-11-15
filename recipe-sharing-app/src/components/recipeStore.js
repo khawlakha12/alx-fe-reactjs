@@ -2,52 +2,45 @@ import create from "zustand";
 
 export const useRecipeStore = create((set) => ({
   recipes: [],
-  searchTerm: "",
-  filteredRecipes: [],
-
-  // Search actions
-  setSearchTerm: (term) =>
-    set((state) => {
-      const filtered = state.recipes.filter((recipe) =>
-        recipe.title.toLowerCase().includes(term.toLowerCase())
-      );
-      return {
-        searchTerm: term,
-        filteredRecipes: filtered,
-      };
-    }),
-
-  filterRecipes: () =>
+  
+  // Favorites
+  favorites: [],
+  addFavorite: (recipeId) =>
     set((state) => ({
-      filteredRecipes: state.recipes.filter((recipe) =>
-        recipe.title.toLowerCase().includes(state.searchTerm.toLowerCase())
-      ),
+      favorites: state.favorites.includes(recipeId)
+        ? state.favorites
+        : [...state.favorites, recipeId],
+    })),
+  removeFavorite: (recipeId) =>
+    set((state) => ({
+      favorites: state.favorites.filter((id) => id !== recipeId),
     })),
 
-  // CRUD actions
+  // Recommendations
+  recommendations: [],
+  generateRecommendations: () =>
+    set((state) => {
+      // Simple example: recommend recipes that are NOT already in favorites
+      const recommended = state.recipes.filter(
+        (recipe) => !state.favorites.includes(recipe.id)
+      );
+      return { recommendations: recommended };
+    }),
+
+  // Existing CRUD
   addRecipe: (recipe) =>
     set((state) => ({
       recipes: [...state.recipes, recipe],
-      filteredRecipes: [...state.recipes, recipe], // keep in sync
     })),
-
   updateRecipe: (updatedRecipe) =>
-    set((state) => {
-      const updatedList = state.recipes.map((r) =>
+    set((state) => ({
+      recipes: state.recipes.map((r) =>
         r.id === updatedRecipe.id ? updatedRecipe : r
-      );
-      return {
-        recipes: updatedList,
-        filteredRecipes: updatedList,
-      };
-    }),
-
+      ),
+    })),
   deleteRecipe: (id) =>
-    set((state) => {
-      const updatedList = state.recipes.filter((r) => r.id !== id);
-      return {
-        recipes: updatedList,
-        filteredRecipes: updatedList,
-      };
-    }),
+    set((state) => ({
+      recipes: state.recipes.filter((r) => r.id !== id),
+      favorites: state.favorites.filter((fid) => fid !== id), // remove deleted recipe from favorites
+    })),
 }));

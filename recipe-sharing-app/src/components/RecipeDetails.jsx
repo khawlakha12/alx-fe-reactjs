@@ -1,55 +1,32 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipeStore } from "../store/recipeStore";
-import DeleteRecipeButton from "./DeleteRecipeButton";
 
 const RecipeDetails = () => {
-  const { id } = useParams();  // URL param /recipes/:id
-  const navigate = useNavigate();
+  // existing code...
+  const addFavorite = useRecipeStore((state) => state.addFavorite);
+  const removeFavorite = useRecipeStore((state) => state.removeFavorite);
+  const favorites = useRecipeStore((state) => state.favorites);
 
-  // Get recipe safely from the store
-  const recipe = useRecipeStore((state) =>
-    state.recipes.find((r) => r.id === id)
-  );
-
-  // If recipe does NOT exist → show a safe message
-  if (!recipe) {
-    return (
-      <div>
-        <h2>Recipe Not Found</h2>
-        <button onClick={() => navigate("/")}>Go Back</button>
-      </div>
-    );
-  }
+  const isFavorite = favorites.includes(recipe.id);
 
   return (
     <div>
-      <h1>{recipe.title}</h1>
-      <p>{recipe.description}</p>
-
-      {/* Ingredients */}
-      <h3>Ingredients</h3>
-      <ul>
-        {recipe.ingredients?.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-
-      {/* Steps */}
-      <h3>Steps</h3>
-      <ol>
-        {recipe.steps?.map((step, index) => (
-          <li key={index}>{step}</li>
-        ))}
-      </ol>
-
-      <Link to={`/edit/${recipe.id}`}>Edit Recipe</Link>
-
-      <DeleteRecipeButton
-        recipeId={recipe.id}
-        onDeleted={() => navigate("/")}
-      />
+      {/* existing details */}
+      <button
+        onClick={() =>
+          isFavorite ? removeFavorite(recipe.id) : addFavorite(recipe.id)
+        }
+        style={{
+          marginTop: "10px",
+          backgroundColor: isFavorite ? "red" : "green",
+          color: "white",
+          padding: "8px 12px",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+      </button>
     </div>
   );
 };
-
-export default RecipeDetails;

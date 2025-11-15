@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useRecipeStore } from "./recipeStore";
 import SearchBar from "./SearchBar";
+import FavoritesList from "./FavoritesList";
+import RecommendationsList from "./RecommendationsList";
 
 const RecipeList = () => {
   const recipes = useRecipeStore((state) => state.filteredRecipes);
