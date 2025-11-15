@@ -1,27 +1,38 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useRecipeStore } from '../store/recipeStore'
-
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useRecipeStore } from "./recipeStore";
+import SearchBar from "./SearchBar";
 
 const RecipeList = () => {
-const recipes = useRecipeStore((s) => s.recipes)
+  const recipes = useRecipeStore((state) => state.filteredRecipes);
+  const filterRecipes = useRecipeStore((state) => state.filterRecipes);
 
+  // Filter initially (or after refreshing)
+  useEffect(() => {
+    filterRecipes();
+  }, []);
 
-return (
-<div>
-<h3>All Recipes</h3>
-{recipes.length === 0 && <p>No recipes yet.</p>}
-<ul>
-{recipes.map((r) => (
-<li key={r.id} style={{ marginBottom: 8 }}>
-<Link to={`/recipes/${r.id}`} style={{ fontWeight: 600 }}>{r.title}</Link>
-<div style={{ fontSize: 13, color: '#555' }}>{r.description}</div>
-</li>
-))}
-</ul>
-</div>
-)
-}
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Recipes</h1>
 
+      <SearchBar />
 
-export default RecipeList
+      {recipes.length === 0 ? (
+        <p>No recipes found.</p>
+      ) : (
+        <ul>
+          {recipes.map((recipe) => (
+            <li key={recipe.id} style={{ margin: "12px 0" }}>
+              <Link to={`/recipes/${recipe.id}`} style={{ fontSize: "18px" }}>
+                {recipe.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default RecipeList;
