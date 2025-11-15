@@ -1,84 +1,91 @@
-import React, { useState, useEffect } from 'react'
-const updateRecipe = useRecipeStore((s) => s.updateRecipe)
+import { useParams, useNavigate } from "react-router-dom";
+import { useRecipeStore } from "../store/recipeStore";
+import React, { useEffect, useState } from "react";
 
+const EditRecipeForm = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-const [title, setTitle] = useState('')
-const [description, setDescription] = useState('')
-const [ingredients, setIngredients] = useState('')
-const [steps, setSteps] = useState('')
+  const recipe = useRecipeStore((state) =>
+    state.recipes.find((r) => r.id === id)
+  );
 
+  const addRecipe = useRecipeStore((state) => state.addRecipe);
+  const updateRecipe = useRecipeStore((state) => state.updateRecipe);
 
-useEffect(() => {
-if (recipeFromStore) {
-setTitle(recipeFromStore.title || '')
-setDescription(recipeFromStore.description || '')
-setIngredients((recipeFromStore.ingredients || []).join('\n'))
-setSteps((recipeFromStore.steps || []).join('\n'))
-} else {
-// if adding new recipe, clear fields
-setTitle('')
-setDescription('')
-setIngredients('')
-setSteps('')
-}
-}, [recipeFromStore])
+  // Local form states
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [steps, setSteps] = useState("");
 
-
-const handleSubmit = (e) => {
-e.preventDefault()
-const payload = {
-id: id || makeId(),
-title: title.trim(),
-description: description.trim(),
-ingredients: ingredients.split('\n').map((s) => s.trim()).filter(Boolean),
-steps: steps.split('\n').map((s) => s.trim()).filter(Boolean)
-}
-
-
-if (id) {
-updateRecipe(payload)
-navigate(`/recipes/${id}`)
-} else {
-addRecipe(payload)
-navigate(`/recipes/${payload.id}`)
-}
-
-return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>
-    <h3>{id ? 'Edit Recipe' : 'Add Recipe'}</h3>
-    
-    
-    <div style={{ marginBottom: 8 }}>
-    <label>Title</label>
-    <input value={title} onChange={(e) => setTitle(e.target.value)} required style={{ width: '100%' }} />
-    </div>
-    
-    
-    <div style={{ marginBottom: 8 }}>
-    <label>Description</label>
-    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} style={{ width: '100%' }} />
-    </div>
-    
-    
-    <div style={{ marginBottom: 8 }}>
-    <label>Ingredients (one per line)</label>
-    <textarea value={ingredients} onChange={(e) => setIngredients(e.target.value)} rows={4} style={{ width: '100%' }} />
-    </div>
-    
-    
-    <div style={{ marginBottom: 8 }}>
-    <label>Steps (one per line)</label>
-    <textarea value={steps} onChange={(e) => setSteps(e.target.value)} rows={6} style={{ width: '100%' }} />
-    </div>
-    
-    
-    <div>
-    <button type="submit" style={{ marginRight: 8 }}>{id ? 'Save' : 'Create'}</button>
-    <button type="button" onClick={() => navigate(id ? `/recipes/${id}` : '/')}>Cancel</button>
-    </div>
-    </form>
-    )
+  // Load existing recipe for editing
+  useEffect(() => {
+    if (recipe) {
+      setTitle(recipe.title);
+      setDescription(recipe.description);
+      setIngredients(recipe.ingredients.join("\n"));
+      setSteps(recipe.steps.join("\n"));
     }
-    
-    
-    export default EditRecipeForm
+  }, [recipe]);
+
+  // FORM SUBMISSION
+  const handleSubmit = (event) => {
+    event.preventDefault(); // REQUIRED ✔ FIXED
+
+    const updatedData = {
+      id: id || String(Date.now()), // Keep same ID when editing
+      title,
+      description,
+      ingredients: ingredients.split("\n").filter(Boolean),
+      steps: steps.split("\n").filter(Boolean),
+    };
+
+    if (id) {
+      updateRecipe(updatedData); // Edit mode
+      navigate(`/recipes/${id}`);
+    } else {
+      addRecipe(updatedData); // Create mode
+      navigate(`/recipes/${updatedData.id}`);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2>{id ? "Edit Recipe" : "Add New Recipe"}</h2>
+
+      {/* Title */}
+      <input
+        type="text"
+        placeholder="Recipe title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+
+      {/* Description */}
+      <textarea
+        placeholder="Recipe description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
+      {/* Ingredients */}
+      <textarea
+        placeholder="Ingredients (one per line)"
+        value={ingredients}
+        onChange={(e) => setIngredients(e.target.value)}
+      />
+
+      {/* Steps */}
+      <textarea
+        placeholder="Steps (one per line)"
+        value={steps}
+        onChange={(e) => setSteps(e.target.value)}
+      />
+
+      <button type="submit">{id ? "Save Changes" : "Create Recipe"}</button>
+    </form>
+  );
+};
+
+export default EditRecipeForm;
