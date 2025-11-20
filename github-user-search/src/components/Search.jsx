@@ -1,133 +1,94 @@
 import React, { useState } from "react";
-import advancedSearch from "../services/githubService";
+import fetchUserData from "../services/githubService";
 
-function Search() {
+export default function Search() {
   const [username, setUsername] = useState("");
   const [location, setLocation] = useState("");
   const [minRepos, setMinRepos] = useState("");
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [page, setPage] = useState(1);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
-    setResults([]);
-    setPage(1);
 
     try {
-      const data = await advancedSearch(username, location, minRepos, 1);
-      setResults(data.items);
-    } catch (err) {
-      setError("Looks like we cant find the user");
-    } finally {
-      setLoading(false);
-    }
-  };
+      const data = await fetchUserData({ username, location, minRepos });
 
-  const loadMore = async () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-
-    try {
-      const data = await advancedSearch(username, location, minRepos, nextPage);
-      setResults((prev) => [...prev, ...data.items]);
+      if (!data.items || data.items.length === 0) {
+        setError("Looks like we can’t find the user");
+        setResults([]);
+      } else {
+        setResults(data.items);
+      }
     } catch (err) {
-      setError("An error occurred while loading more users");
+      setError("An error occurred while fetching data");
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 mt-10">
-      {/* Search Form */}
+    <div className="p-4 max-w-xl mx-auto">
       <form
         onSubmit={handleSearch}
-        className="bg-white shadow p-6 rounded-lg space-y-4"
+        className="bg-white p-4 rounded-xl shadow-md space-y-4"
       >
-        <h2 className="text-xl font-bold text-center">Advanced GitHub Search</h2>
-
-        {/* Username */}
         <input
           type="text"
-          placeholder="Username (optional)"
+          placeholder="Search username..."
+          className="w-full p-2 border rounded"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full p-2 border rounded"
         />
 
-        {/* Location */}
         <input
           type="text"
-          placeholder="Location (e.g. Morocco)"
+          placeholder="Location (optional)"
+          className="w-full p-2 border rounded"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="w-full p-2 border rounded"
         />
 
-        {/* Minimum Repositories */}
         <input
           type="number"
-          placeholder="Minimum Repositories"
+          placeholder="Min repos (optional)"
+          className="w-full p-2 border rounded"
           value={minRepos}
           onChange={(e) => setMinRepos(e.target.value)}
-          className="w-full p-2 border rounded"
         />
 
-        <button
-          type="submit"
-          className="w-full p-3 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
           Search
         </button>
       </form>
 
-      {/* Loading */}
-      {loading && <p className="text-center mt-4">Loading...</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
 
-      {/* Error */}
-      {error && <p className="text-center mt-4 text-red-500">{error}</p>}
-
-      {/* Results */}
-      <div className="mt-8 space-y-4">
+      <div className="mt-6 space-y-4">
         {results.map((user) => (
           <div
             key={user.id}
-            className="flex items-center gap-4 bg-gray-100 p-4 rounded"
+            className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
           >
-            <img
-              src={user.avatar_url}
-              alt="avatar"
-              className="w-16 h-16 rounded-full"
-            />
-            <div>
-              <h3 className="font-bold">{user.login}</h3>
-              <a
-                href={user.html_url}
-                className="text-blue-600 underline"
-                target="_blank"
-              >
-                View Profile
-              </a>
+            <div className="flex items-center gap-3">
+              <img
+                src={user.avatar_url}
+                alt={user.login}
+                className="w-12 h-12 rounded-full"
+              />
+              <div>
+                <p className="font-semibold">{user.login}</p>
+                <a
+                  href={user.html_url}
+                  target="_blank"
+                  className="text-blue-600 text-sm"
+                >
+                  View Profile
+                </a>
+              </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Load More */}
-      {results.length > 0 && (
-        <div className="text-center mt-6">
-          <button
-            onClick={loadMore}
-            className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
-          >
-            Load More
-          </button>
-        </div>
-      )}
     </div>
   );
 }
-
-export default Search;
