@@ -7,88 +7,120 @@ export default function Search() {
   const [minRepos, setMinRepos] = useState("");
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError("");
+    setResults([]);
+    setPage(1);
 
     try {
-      const data = await fetchUserData({ username, location, minRepos });
-
+      const data = await fetchUserData({ username, location, minRepos, page: 1 });
       if (!data.items || data.items.length === 0) {
-        setError("Looks like we can’t find the user");
-        setResults([]);
+        setError("Looks like we cant find the user");
       } else {
         setResults(data.items);
       }
-    } catch (err) {
-      setError("An error occurred while fetching data");
+    } catch {
+      setError("Looks like we cant find the user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    setLoading(true);
+    try {
+      const data = await fetchUserData({ username, location, minRepos, page: nextPage });
+      setResults((prev) => [...prev, ...data.items]);
+    } catch {
+      setError("Looks like we cant find the user");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="max-w-2xl mx-auto p-4 mt-10">
       <form
         onSubmit={handleSearch}
-        className="bg-white p-4 rounded-xl shadow-md space-y-4"
+        className="bg-white shadow p-6 rounded-lg space-y-4"
       >
+        <h2 className="text-xl font-bold text-center">Advanced GitHub Search</h2>
+
         <input
           type="text"
-          placeholder="Search username..."
-          className="w-full p-2 border rounded"
+          placeholder="Username (optional)"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          className="w-full p-2 border rounded"
         />
-
         <input
           type="text"
           placeholder="Location (optional)"
-          className="w-full p-2 border rounded"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+          className="w-full p-2 border rounded"
         />
-
         <input
           type="number"
-          placeholder="Min repos (optional)"
-          className="w-full p-2 border rounded"
+          placeholder="Minimum Repositories (optional)"
           value={minRepos}
           onChange={(e) => setMinRepos(e.target.value)}
+          className="w-full p-2 border rounded"
         />
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+        <button
+          type="submit"
+          className="w-full p-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
           Search
         </button>
       </form>
 
-      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {loading && <p className="text-center mt-4">Loading...</p>}
+      {error && <p className="text-center mt-4 text-red-500">{error}</p>}
 
       <div className="mt-6 space-y-4">
         {results.map((user) => (
           <div
             key={user.id}
-            className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
+            className="flex items-center gap-4 bg-gray-100 p-4 rounded"
           >
-            <div className="flex items-center gap-3">
-              <img
-                src={user.avatar_url}
-                alt={user.login}
-                className="w-12 h-12 rounded-full"
-              />
-              <div>
-                <p className="font-semibold">{user.login}</p>
-                <a
-                  href={user.html_url}
-                  target="_blank"
-                  className="text-blue-600 text-sm"
-                >
-                  View Profile
-                </a>
-              </div>
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              className="w-16 h-16 rounded-full"
+            />
+            <div>
+              <p className="font-bold">{user.login}</p>
+              <a
+                href={user.html_url}
+                target="_blank"
+                className="text-blue-600 underline"
+              >
+                View Profile
+              </a>
             </div>
           </div>
         ))}
       </div>
+
+      {results.length > 0 && (
+        <div className="text-center mt-6">
+          <button
+            onClick={loadMore}
+            className="px-6 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 }
