@@ -3,50 +3,57 @@ import { useState } from "react";
 const AddRecipeForm = () => {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
-  const [steps, setSteps] = useState("");
-  const [error, setError] = useState("");
+  const [instructions, setInstructions] = useState("");
+
+  const [errors, setErrors] = useState({});
+
+  // ✅ Required by your task
+  const validate = () => {
+    const newErrors = {};
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    if (!ingredients.trim()) {
+      newErrors.ingredients = "Ingredients are required";
+    }
+
+    if (!instructions.trim()) {
+      newErrors.instructions = "Instructions are required";
+    }
+
+    const ingredientsList = ingredients
+      .split("\n")
+      .filter((item) => item.trim() !== "");
+
+    if (ingredientsList.length < 2) {
+      newErrors.ingredients =
+        "Please enter at least two ingredients";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Convert textarea text into arrays
-    const ingredientsArray = ingredients
-      .split("\n")
-      .map((item) => item.trim())
-      .filter((item) => item !== "");
+    if (!validate()) return;
 
-    const stepsArray = steps
-      .split("\n")
-      .map((item) => item.trim())
-      .filter((item) => item !== "");
-
-    // Validation
-    if (!title || ingredientsArray.length === 0 || stepsArray.length === 0) {
-      setError("All fields are required.");
-      return;
-    }
-
-    if (ingredientsArray.length < 2) {
-      setError("Please enter at least 2 ingredients.");
-      return;
-    }
-
-    setError("");
-
-    // Mock submit (you can later send to backend)
     const newRecipe = {
       title,
-      ingredients: ingredientsArray,
-      instructions: stepsArray,
+      ingredients: ingredients.split("\n"),
+      instructions: instructions.split("\n"),
     };
 
-    console.log("Recipe submitted:", newRecipe);
+    console.log("Recipe added:", newRecipe);
 
     // Reset form
     setTitle("");
     setIngredients("");
-    setSteps("");
-    alert("Recipe added successfully ✅");
+    setInstructions("");
+    setErrors({});
   };
 
   return (
@@ -68,9 +75,14 @@ const AddRecipeForm = () => {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter recipe title"
               className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recipe title"
             />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.title}
+              </p>
+            )}
           </div>
 
           {/* Ingredients */}
@@ -82,37 +94,39 @@ const AddRecipeForm = () => {
               rows="5"
               value={ingredients}
               onChange={(e) => setIngredients(e.target.value)}
+              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Example: 2 eggs"
-              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            ></textarea>
+            />
+            {errors.ingredients && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.ingredients}
+              </p>
+            )}
           </div>
 
           {/* Instructions */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
-              Preparation Steps (one per line)
+              Instructions (one step per line)
             </label>
             <textarea
               rows="5"
-              value={steps}
-              onChange={(e) => setSteps(e.target.value)}
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Example: Mix ingredients"
-              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            ></textarea>
+            />
+            {errors.instructions && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.instructions}
+              </p>
+            )}
           </div>
 
-          {/* Error message */}
-          {error && (
-            <p className="text-red-500 text-sm text-center">
-              {error}
-            </p>
-          )}
-
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold 
-                       hover:bg-blue-700 transition duration-300"
+            className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
           >
             Submit Recipe
           </button>
