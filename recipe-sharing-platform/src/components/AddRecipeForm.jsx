@@ -3,11 +3,11 @@ import { useState } from "react";
 const AddRecipeForm = () => {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
-  const [instructions, setInstructions] = useState("");
+  const [steps, setSteps] = useState("");
 
   const [errors, setErrors] = useState({});
 
-  // ✅ Required by your task
+  // ✅ Validation function required
   const validate = () => {
     const newErrors = {};
 
@@ -19,8 +19,8 @@ const AddRecipeForm = () => {
       newErrors.ingredients = "Ingredients are required";
     }
 
-    if (!instructions.trim()) {
-      newErrors.instructions = "Instructions are required";
+    if (!steps.trim()) {
+      newErrors.steps = "Steps are required";
     }
 
     const ingredientsList = ingredients
@@ -38,21 +38,20 @@ const AddRecipeForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     const newRecipe = {
       title,
       ingredients: ingredients.split("\n"),
-      instructions: instructions.split("\n"),
+      steps: steps.split("\n"),
     };
 
-    console.log("Recipe added:", newRecipe);
+    console.log("Recipe submitted:", newRecipe);
 
-    // Reset form
+    // Reset
     setTitle("");
     setIngredients("");
-    setInstructions("");
+    setSteps("");
     setErrors({});
   };
 
@@ -104,21 +103,21 @@ const AddRecipeForm = () => {
             )}
           </div>
 
-          {/* Instructions */}
+          {/* Steps */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
-              Instructions (one step per line)
+              Preparation Steps (one per line)
             </label>
             <textarea
               rows="5"
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
               className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Example: Mix ingredients"
             />
-            {errors.instructions && (
+            {errors.steps && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.instructions}
+                {errors.steps}
               </p>
             )}
           </div>
